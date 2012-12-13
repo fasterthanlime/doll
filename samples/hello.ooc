@@ -12,11 +12,30 @@ main: func {
 
     engine def("level", |e|
         "level being created" println()
-        engine add(engine make("dye-window"))
+
+        dw := engine make("dye-window")
+        dw listen("key-pressed", |m|
+            "Key pressed!" println()
+
+            keycode := m get("keycode", Int)
+            if (keycode == 27) {
+                "Keycode 27, should exit" println()
+                e emit("exit")
+            }
+        )
+
         engine add(engine make("triangle"))
 
         e listen("update", |m|
             "level being updated" println()
+            dw update()
+        )
+
+        e listen("exit", |m|
+            "Destroying dw, quitting from engine" println()
+            dw emit("destroy")
+            e destroy()
+            engine emit("quit")
         )
     )
 

@@ -33,6 +33,8 @@ Entity: class {
     queue := Queue<Message> new()
     props := HashMap<String, Property> new()
 
+    dead := false
+
     init: func (=engine, =name) {
         listen("update", |m|
             drain()
@@ -48,16 +50,35 @@ Entity: class {
     }
 
     emit: func ~onlyName (name: String) {
+        if (dead) return
+
         queue push(Message new(name))
     }
 
+    emit: func ~withClosure (name: String, f: Func(Message)) {
+        if (dead) return
+
+        m := Message new(name)
+        f(m)
+        queue push(m)
+    }
+
     drain: func {
+        if (dead) return
+
         while (!queue empty?()) {
             dispatch(queue pop())
         }
     }
 
+    update: func {
+        emit("update")
+        drain()
+    }
+
     dispatch: func (m: Message) {
+        if (dead) return
+
         for (r in receivers) {
             r receive(m)
         }
@@ -84,6 +105,11 @@ Entity: class {
 
     get: func <T> (name: String, T: Class) -> T {
         props get(name) get()
+    }
+
+    destroy: func {
+        queue clear()
+        dead = true
     }
 
 }
@@ -115,8 +141,12 @@ Message: class {
 
     }
 
-    add: func <T> (name: String, t: T) {
+    set: func <T> (name: String, t: T) {
         props put(name, Property<T> new(t))
+    }
+
+    get: func <T> (name: String, T: Class) -> T {
+        props get(name) get()
     }
 
 }
@@ -161,28 +191,45 @@ Engine: class extends Entity {
     prototypes := HashMap<String, Prototype> new()
     entities := ArrayList<Entity> new()
 
+    running := true
+
     init: func {
         super(this, "engine")
 
         listen("update", |m|
+            println()
+            "=============================================" println()
+            println()
+
             updateMessage := Message new("update")
-            for (e in entities) {
-                e dispatch(updateMessage)
+            iter := entities iterator()
+            while (iter hasNext?()) {
+                e := iter next()
+                if (e dead) {
+                    iter remove()
+                } else {
+                    e dispatch(updateMessage)
+                }
             }
+        )
+
+        listen("quit", |m|
+            running = false
         )
     }
 
     start: func {
-        Thread new(||
+        thread := Thread new(||
             emit("start")
             drain()
 
-            while(true) {
+            while(running) {
                 Time sleepMilli(300)
-                emit("update")
-                drain()
+                update()
             }
-        ) start(). wait()
+        )
+        thread start()
+        thread wait()
     }
 
     def: func (name: String, f: Func (Entity)) {
@@ -206,6 +253,10 @@ Engine: class extends Entity {
 
     add: func (e: Entity) {
         entities add(e)
+    }
+
+    remove: func (e: Entity) {
+        entities remove(e)
     }
 
 }
