@@ -144,12 +144,21 @@ Property: class <T> {
 
 }
 
+Prototype: class {
+
+    name: String
+    constructor: Func (Entity)
+
+    init: func (=name, =constructor)
+
+}
+
 /**
  * The mother entity
  */
 Engine: class extends Entity {
 
-    prototypes := HashMap<String, Entity> new()
+    prototypes := HashMap<String, Prototype> new()
     entities := ArrayList<Entity> new()
 
     init: func {
@@ -177,20 +186,18 @@ Engine: class extends Entity {
     }
 
     def: func (name: String, f: Func (Entity)) {
-        entity := Entity new(this, name)
-        f(entity)
-        prototypes put(name, entity)
+        prototypes put(name, Prototype new(name, f))
     }
 
-    make: func (name: String, f: Func (Entity)) {
+    make: func (name: String) -> Entity {
         prototype := prototypes get(name)
         if (!prototype) {
             Exception new("Unknown prototype: %s" format(name)) throw()
         }
 
-        entity := prototype clone()
-        entity emit("create")
-        f(entity)
+        entity := Entity new(this, prototype name)
+        prototype constructor(entity)
+        entity
     }
 
     clone: func {

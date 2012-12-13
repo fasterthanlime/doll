@@ -11,23 +11,21 @@ main: func {
     engine initDye()
 
     engine def("level", |e|
-        e listen("create", |m|
-            "level being created" println()
-            e engine make("dye-window", |dw|
-                "Got dye window!" println()
-                e engine add(dw)
-            )
-        )
+        "level being created" println()
+        engine add(engine make("dye-window"))
+        engine add(engine make("triangle"))
 
         e listen("update", |m|
             "level being updated" println()
         )
     )
 
+    engine def("triangle", |e|
+        "Triangle created!" println()
+    )
+
     engine listen("start", |m|
-        engine make("level", |l|
-            engine add(l)
-        )
+        engine add(engine make("level"))
     )
 
     engine start()
