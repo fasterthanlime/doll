@@ -1,22 +1,31 @@
 
 use doll
 
-import doll/Engine
+import doll/[Engine, Dye]
+
+use sdl, cairo, glew, glu // workaround
 
 main: func {
 
     engine := Engine new()
+    engine initDye()
 
     engine def("level", |e|
+        e listen("create", |m|
+            "level being created" println()
+            e engine make("dye-window", |dw|
+                "Got dye window!" println()
+                e engine add(dw)
+            )
+        )
+
         e listen("update", |m|
             "level being updated" println()
         )
     )
 
     engine listen("start", |m|
-        "got start from outside engine" println()
         engine make("level", |l|
-            "level made" println()
             engine add(l)
         )
     )

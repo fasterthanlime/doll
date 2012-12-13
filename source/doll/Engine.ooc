@@ -34,10 +34,12 @@ Entity: class {
     props := HashMap<String, Property> new()
 
     init: func (=engine, =name) {
+        listen("update", |m|
+            drain()
+        )
     }
 
     listen: func (name: String, f: Func (Message)) {
-        "Adding a receiver for %s in %s" printfln(name, this name)
         receivers add(Receiver new(|m|
             if (m name == name) {
                 f(m)
@@ -69,6 +71,19 @@ Entity: class {
             e props put(k, v clone())
         )
         e
+    }
+
+    set: func <T> (name: String, t: T) {
+        p := props get(name)
+        if (p) {
+            p set(t)
+        } else {
+            props put(name, Property new(t))
+        }
+    }
+
+    get: func <T> (name: String, T: Class) -> T {
+        props get(name) get()
     }
 
 }
@@ -115,6 +130,10 @@ Property: class <T> {
 
     }
 
+    set: func (=t) {
+
+    }
+
     get: func -> T {
         t
     }
@@ -137,7 +156,6 @@ Engine: class extends Entity {
         super(this, "engine")
 
         listen("update", |m|
-            "engine update" println()
             updateMessage := Message new("update")
             for (e in entities) {
                 e dispatch(updateMessage)
@@ -151,7 +169,6 @@ Engine: class extends Entity {
             drain()
 
             while(true) {
-                "engine loop" println()
                 Time sleepMilli(300)
                 emit("update")
                 drain()
@@ -166,7 +183,12 @@ Engine: class extends Entity {
     }
 
     make: func (name: String, f: Func (Entity)) {
-        entity := prototypes get(name) clone()
+        prototype := prototypes get(name)
+        if (!prototype) {
+            Exception new("Unknown prototype: %s" format(name)) throw()
+        }
+
+        entity := prototype clone()
         entity emit("create")
         f(entity)
     }
