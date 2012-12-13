@@ -1,6 +1,6 @@
 
 use dye
-import dye
+import dye/[core, math, input]
 
 use sdl, cairo, glew, glu // workaround
 
@@ -14,12 +14,20 @@ extend Engine {
             dye := Dye new(640, 480, "Dye example")
             e set("dye", dye)
 
+            input := Input new()
+            e set("input", input)
+
             e listen("update", |m|
                 "Updating dye" println()
+                input _poll()
+
+                if (input isPressed(Keys ESC)) {
+                    e emit("key-pressed", |m|
+                        m set("keycode", 27)
+                    )
+                }
+
                 dye render()
-                e emit("key-pressed", |m|
-                    m set("keycode", 27 as Int)
-                )
             )
 
             e listen("destroy", |m|

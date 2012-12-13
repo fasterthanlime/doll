@@ -17,10 +17,10 @@ main: func {
         dw listen("key-pressed", |m|
             "Key pressed!" println()
 
-            keycode := m get("keycode", Int)
-            if (keycode == 27) {
-                "Keycode 27, should exit" println()
-                e emit("exit")
+            match (m get("keycode", Int)) {
+                case 27 =>
+                    "Keycode 27, should exit" println()
+                    e emit("exit")
             }
         )
 

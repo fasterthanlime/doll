@@ -224,7 +224,7 @@ Engine: class extends Entity {
             drain()
 
             while(running) {
-                Time sleepMilli(300)
+                Time sleepMilli(20)
                 update()
             }
         )
