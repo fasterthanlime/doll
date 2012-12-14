@@ -204,10 +204,6 @@ Engine: class extends Entity {
         super(this, "engine")
 
         listen("update", |m|
-            println()
-            "=============================================" println()
-            println()
-
             updateMessage := Message new("update")
             iter := entities iterator()
             while (iter hasNext?()) {

@@ -1,9 +1,9 @@
 
-use doll
-
-import doll/[Engine, Dye]
-
 use sdl, glew, glu // workaround
+use doll, dye
+
+import doll/[core, dye]
+import dye/input
 
 main: func (argc: Int, argv: CString*) {
 
@@ -20,11 +20,12 @@ main: func (argc: Int, argv: CString*) {
         )
 
         dw listen("key-pressed", |m|
-            "Key pressed!" println()
+            key := m get("keycode", Int)
+            "Key %d pressed!" printfln(key)
 
-            match (m get("keycode", Int)) {
-                case 27 =>
-                    "Keycode 27, should exit" println()
+            match key {
+                case Keys ESC =>
+                    "Escape pressed should exit" println()
                     e emit("exit")
             }
         )
@@ -32,7 +33,6 @@ main: func (argc: Int, argv: CString*) {
         engine add(engine make("triangle"))
 
         e listen("update", |m|
-            "level being updated" println()
             dw update()
         )
 
