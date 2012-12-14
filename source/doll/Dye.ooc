@@ -2,7 +2,7 @@
 use dye
 import dye/[core, math, input]
 
-use sdl, cairo, glew, glu // workaround
+use sdl, glew, glu // workaround
 
 import doll/Engine
 

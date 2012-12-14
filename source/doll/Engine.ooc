@@ -1,6 +1,4 @@
 
-use zeromq
-
 import structs/[ArrayList, LinkedList, HashMap]
 import threading/Thread
 import os/Time
@@ -219,17 +217,13 @@ Engine: class extends Entity {
     }
 
     start: func {
-        thread := Thread new(||
-            emit("start")
-            drain()
+        emit("start")
+        drain()
 
-            while(running) {
-                Time sleepMilli(20)
-                update()
-            }
-        )
-        thread start()
-        thread wait()
+        while(running) {
+            Time sleepMilli(20)
+            update()
+        }
     }
 
     def: func (name: String, f: Func (Entity)) {

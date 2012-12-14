@@ -3,9 +3,9 @@ use doll
 
 import doll/[Engine, Dye]
 
-use sdl, cairo, glew, glu // workaround
+use sdl, glew, glu // workaround
 
-main: func {
+main: func (argc: Int, argv: CString*) {
 
     engine := Engine new()
     engine initDye()
