@@ -13,7 +13,12 @@ main: func (argc: Int, argv: CString*) {
     engine def("level", |e|
         "level being created" println()
 
-        dw := engine make("dye-window")
+        dw := engine make("dye-window", |dw|
+            dw set("width", 1024)
+            dw set("height", 768)
+            dw set("title", "Hello example")
+        )
+
         dw listen("key-pressed", |m|
             "Key pressed!" println()
 

@@ -92,13 +92,22 @@ Entity: class {
         e
     }
 
-    set: func <T> (name: String, t: T) {
+    fallback: func <T> (name: String, t: T) -> T {
+        if (props contains?(name)) {
+            get(name, T)
+        } else {
+            set(name, t)
+        }
+    }
+
+    set: func <T> (name: String, t: T) -> T {
         p := props get(name)
         if (p) {
             p set(t)
         } else {
             props put(name, Property new(t))
         }
+        t
     }
 
     get: func <T> (name: String, T: Class) -> T {
@@ -230,15 +239,20 @@ Engine: class extends Entity {
         prototypes put(name, Prototype new(name, f))
     }
 
-    make: func (name: String) -> Entity {
+    make: func ~withProps (name: String, f: Func (Entity)) -> Entity {
         prototype := prototypes get(name)
         if (!prototype) {
             Exception new("Unknown prototype: %s" format(name)) throw()
         }
 
         entity := Entity new(this, prototype name)
+        f(entity)
         prototype constructor(entity)
         entity
+    }
+
+    make: func (name: String) -> Entity {
+        make(name, |e| /* nothing to do here */)
     }
 
     clone: func {

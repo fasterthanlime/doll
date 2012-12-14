@@ -10,15 +10,19 @@ extend Engine {
 
     initDye: func {
         def("dye-window", |e|
-            "Should create a dye window" println()
-            dye := Dye new(640, 480, "Dye example")
+
+            width  := e fallback("width", 640)
+            height := e fallback("height", 480)
+            title  := e fallback("title", "Dye window")
+
+            "Should create a %dx%d dye window" printfln(width, height)
+            dye := Dye new(width, height, title)
             e set("dye", dye)
 
             input := Input new()
             e set("input", input)
 
             e listen("update", |m|
-                "Updating dye" println()
                 input _poll()
 
                 if (input isPressed(Keys ESC)) {
